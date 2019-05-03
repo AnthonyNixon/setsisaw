@@ -17,6 +17,7 @@ import (
 )
 
 var JWT_SIGNING_KEY []byte
+const TOKEN_VALID_TIME = 2 * time.Minute
 
 func Initialize() {
 	log.Print("Initializing Authentication")
@@ -60,10 +61,10 @@ func IsAuthed(username string, password string) (bool, error) {
 	return true, nil
 }
 
-func GetToken(username string) (string, error) {
+func NewToken(username string) (string, types.Error) {
 	var jwtKey = JWT_SIGNING_KEY
 
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(TOKEN_VALID_TIME)
 	claims := &types.Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -73,7 +74,57 @@ func GetToken(username string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", customerrors.New(http.StatusInternalServerError, err.Error())
+	}
+
+	return tokenString, nil
+}
+
+func RefreshToken(c *gin.Context) (string, types.Error) {
+	authHeader := c.GetHeader("Authorization")
+	tokenString, err := utils.GetTokenFromHeader(authHeader)
+	if err != nil {
+		return "", customerrors.New(http.StatusInternalServerError, err.Error())
+	}
+
+	claims := &types.Claims{}
+
+	// Parse the JWT string and store the result in `claims`.
+	// Note that we are passing the key in this method as well. This method will return an error
+	// if the token is invalid (if it has expired according to the expiry time we set on sign in),
+	// or if the signature does not match
+	tkn, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return JWT_SIGNING_KEY, nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return "", customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
+		}
+
+		if !tkn.Valid {
+			return "", customerrors.New(http.StatusUnauthorized, err.Error())
+		}
+
+		return "", customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
+
+	}
+
+	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > time.Minute {
+		return "", customerrors.New(http.StatusBadRequest, "too early to refresh token, token is valid for more than 1 minute.")
+	}
+
+	expirationTime := time.Now().Add(TOKEN_VALID_TIME)
+	claims.ExpiresAt = expirationTime.Unix()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err = token.SignedString(JWT_SIGNING_KEY)
+	if err != nil {
+		return "", customerrors.New(http.StatusInternalServerError, err.Error())
+	}
+
+	return tokenString, nil
 }
 
 func GetUsernameFromAuthHeader(c *gin.Context) (string, types.Error) {

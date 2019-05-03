@@ -81,9 +81,9 @@ func SignIn(c *gin.Context) {
 	}
 
 	if authenticated {
-		token, err := auth.GetToken(userAuth.Username)
+		token, err := auth.NewToken(userAuth.Username)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create JWT token: " + err.Error()})
+			c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 			return
 		}
 

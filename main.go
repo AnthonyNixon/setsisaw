@@ -23,6 +23,8 @@ func main() {
 
 	r.GET("/authcheck", handlers.AuthCheck)
 
+	r.GET("/refresh", handlers.RefreshToken)
+
 	log.Print("Running SetsISaw API...")
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
