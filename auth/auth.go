@@ -2,13 +2,14 @@ package auth
 
 import (
 	"database/sql"
-	"errors"
+	"github.com/AnthonyNixon/setsisaw/customerrors"
 	"github.com/AnthonyNixon/setsisaw/database"
 	"github.com/AnthonyNixon/setsisaw/types"
 	"github.com/AnthonyNixon/setsisaw/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -18,12 +19,14 @@ import (
 var JWT_SIGNING_KEY []byte
 
 func Initialize() {
+	log.Print("Initializing Authentication")
 	signingKey := os.Getenv("JWT_SIGNING_KEY")
 	if signingKey == "" {
 		log.Fatal("No Signing Key Present.")
 	}
 
 	JWT_SIGNING_KEY = []byte(signingKey)
+	log.Print("done")
 }
 
 func IsAuthed(username string, password string) (bool, error) {
@@ -60,7 +63,7 @@ func IsAuthed(username string, password string) (bool, error) {
 func GetToken(username string) (string, error) {
 	var jwtKey = JWT_SIGNING_KEY
 
-	expirationTime := time.Now().Add(8 * time.Hour)
+	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &types.Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -73,11 +76,11 @@ func GetToken(username string) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func GetUsernameFromAuthHeader(c *gin.Context) (string, error) {
+func GetUsernameFromAuthHeader(c *gin.Context) (string, types.Error) {
 	authHeader := c.GetHeader("Authorization")
 	tokenString, err := utils.GetTokenFromHeader(authHeader)
 	if err != nil {
-		return "", err
+		return "", customerrors.New(http.StatusInternalServerError, err.Error())
 	}
 
 	claims := &types.Claims{}
@@ -91,18 +94,16 @@ func GetUsernameFromAuthHeader(c *gin.Context) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
-	}
-
-	if !tkn.Valid {
-		return "", errors.New("user unauthorized")
-	}
-
-	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return "", errors.New("user unauthorized")
+			return "", customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
 		}
-		return "", errors.New("invalid JWT token")
+
+		if !tkn.Valid {
+			return "", customerrors.New(http.StatusUnauthorized, err.Error())
+		}
+
+		return "", customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
+
 	}
 
 	return claims.Username, nil

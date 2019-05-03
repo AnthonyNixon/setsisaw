@@ -9,7 +9,7 @@ import (
 func AuthCheck(c *gin.Context) {
 	username, err := auth.GetUsernameFromAuthHeader(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 		return
 	}
 
