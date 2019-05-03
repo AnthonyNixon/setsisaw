@@ -1,7 +1,9 @@
 package users
 
 import (
+	"database/sql"
 	"github.com/AnthonyNixon/setsisaw/auth"
+	"github.com/AnthonyNixon/setsisaw/customerrors"
 	"github.com/AnthonyNixon/setsisaw/database"
 	"github.com/AnthonyNixon/setsisaw/types"
 	"net/http"
@@ -17,18 +19,18 @@ func SignUp(c *gin.Context) {
 	var newUser types.User
 	err := c.BindJSON(&newUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Bad JSON Input, could not bind."})
 		return
 	}
 
 	unique, err := isNewUserUnique(newUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
 		return
 	}
 
 	if !unique {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Username or email is already taken"})
+		c.JSON(http.StatusBadRequest, gin.H{"error3": "Username or email is already taken"})
 		return
 	}
 
@@ -36,13 +38,13 @@ func SignUp(c *gin.Context) {
 	// The second argument is the cost of hashing, which we arbitrarily set as 8 (this value can be more or less, depending on the computing power you wish to utilize)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 8)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error4": err.Error()})
 		return
 	}
 
 	db, err := database.GetConnection()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error5": err.Error()})
 		return
 	}
 	defer db.Close()
@@ -59,6 +61,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusCreated, gin.H{"username": newUser.Username, "email": newUser.Email})
 }
 
 func SignIn(c *gin.Context) {
@@ -80,8 +83,14 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
+
 	if authenticated {
-		token, err := auth.NewToken(userAuth.Username)
+		role, err := getUserRole(userAuth.Username)
+		if err != nil {
+			c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
+		}
+
+		token, err := auth.NewToken(userAuth.Username, role)
 		if err != nil {
 			c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 			return
@@ -109,4 +118,30 @@ func isNewUserUnique(newUser types.User) (bool, error) {
 	}
 
 	return count == 0, nil
+}
+
+func getUserRole(username string) (string, types.Error) {
+	db, err := database.GetConnection()
+	if err != nil {
+		return "", customerrors.New(http.StatusInternalServerError, "could not connect to database")
+	}
+	defer db.Close()
+
+	var role string
+	result := db.QueryRow("select role FROM users where username = ?", username)
+	if err != nil {
+		return "", customerrors.New(http.StatusInternalServerError, "could not query database")
+	}
+
+	err = result.Scan(&role)
+	if err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			return "", customerrors.New(http.StatusInternalServerError, "could not find user role in database")
+		}
+
+		return "", customerrors.New(http.StatusInternalServerError, "could not query database")
+	}
+
+	return role, nil
 }
