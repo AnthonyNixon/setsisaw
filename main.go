@@ -7,11 +7,18 @@ import (
 	"github.com/AnthonyNixon/setsisaw/users"
 	"github.com/gin-gonic/gin"
 	"log"
+	"os"
 )
+
+var PORT = ""
 
 func init() {
 	database.Initialize()
 	auth.Initialize()
+	PORT = os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "8080"
+	}
 }
 
 func main() {
@@ -26,5 +33,8 @@ func main() {
 	r.GET("/refresh", handlers.RefreshToken)
 
 	log.Print("Running SetsISaw API...")
-	r.Run() // listen and serve on 0.0.0.0:8080
+	err := r.Run(":" + PORT) // listen and serve on 0.0.0.0:8080
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
