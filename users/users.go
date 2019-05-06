@@ -23,6 +23,11 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	if newUser.Email == "" || newUser.Username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Must include email and username"})
+		return
+	}
+
 	unique, err := isNewUserUnique(newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
@@ -49,13 +54,13 @@ func SignUp(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("insert into users (username, email, password) values(?,?,?);")
+	stmt, err := db.Prepare("insert into users (username, email, password, first_name, last_name) values(?,?,?,?,?);")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_, err = stmt.Exec(newUser.Username, newUser.Email, hashedPassword)
+	_, err = stmt.Exec(newUser.Username, newUser.Email, hashedPassword, newUser.FirstName, newUser.LastName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

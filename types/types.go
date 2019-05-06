@@ -8,7 +8,12 @@ type User struct {
 	Password string `json:"password"`
 	FirstName string `json:"first_name"`
 	LastName string `json:"last_name"`
-	Location string `json:"location"`
+	Id int `json:"id"`
+}
+
+type Artist struct {
+	Name string `json:"name"`
+	Id int `json:"id"`
 }
 
 type Claims struct {
