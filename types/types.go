@@ -16,6 +16,15 @@ type Artist struct {
 	Id int `json:"id"`
 }
 
+type Location struct {
+	Name string `json:"name"`
+	Description string `json:"description"`
+	City string `json:"city"`
+	State string `json:"state"`
+	Country string `json:"country"`
+	Id int `json:"id"`
+}
+
 type Claims struct {
 	Username string `json:"username"`
 	Role string `json:"role"`
