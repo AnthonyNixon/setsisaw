@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -128,14 +129,14 @@ func RefreshToken(c *gin.Context) (string, types.Error) {
 	return tokenString, nil
 }
 
-func GetUsernameFromAuthHeader(c *gin.Context) (string, types.Error) {
+func GetUserInfo(c *gin.Context) (types.Claims, types.Error) {
 	authHeader := c.GetHeader("Authorization")
+	claims := &types.Claims{}
+
 	tokenString, err := utils.GetTokenFromHeader(authHeader)
 	if err != nil {
-		return "", customerrors.New(http.StatusInternalServerError, err.Error())
+		return *claims, customerrors.New(http.StatusInternalServerError, err.Error())
 	}
-
-	claims := &types.Claims{}
 
 	// Parse the JWT string and store the result in `claims`.
 	// Note that we are passing the key in this method as well. This method will return an error
@@ -147,16 +148,39 @@ func GetUsernameFromAuthHeader(c *gin.Context) (string, types.Error) {
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return "", customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
+			return *claims, customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
 		}
 
 		if !tkn.Valid {
-			return "", customerrors.New(http.StatusUnauthorized, err.Error())
+			return *claims, customerrors.New(http.StatusUnauthorized, err.Error())
 		}
 
-		return "", customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
+		return *claims, customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
 
 	}
 
-	return claims.Username, nil
+	return *claims, nil
+}
+
+func IsEntitled(claims types.Claims, requirement string) bool {
+	switch strings.ToUpper(claims.Role) {
+	case "USER":
+		switch requirement {
+		case "USER":
+			return true
+		default:
+			return false
+		}
+	case "EDITOR":
+		switch requirement {
+		case "USER", "EDITOR":
+			return true
+		default:
+			return false
+		}
+	case "ADMIN":
+		return true
+	default:
+		return false
+	}
 }

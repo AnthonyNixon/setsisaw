@@ -7,11 +7,11 @@ import (
 )
 
 func AuthCheck(c *gin.Context) {
-	username, err := auth.GetUsernameFromAuthHeader(c)
+	claims, err := auth.GetUserInfo(c)
 	if err != nil {
 		c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 		return
 	}
 
-	c.String(http.StatusOK, username)
+	c.JSON(http.StatusOK, claims)
 }

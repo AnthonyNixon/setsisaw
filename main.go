@@ -33,6 +33,9 @@ func main() {
 
 	r.GET("/refresh", handlers.RefreshToken)
 
+	// Artists
+	r.POST("/artists", handlers.NewArtist)
+
 	log.Printf("Running SetsISaw API on :%s...", PORT)
 	err := r.Run(fmt.Sprintf(":%s", PORT)) // listen and serve on 0.0.0.0:8080
 	if err != nil {
