@@ -1,6 +1,5 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', "gcr.io/$PROJECT_ID/setsisaw-api:$_TAG", '.' ]
-    env: ["_TAG=$(echo ${TAG_NAME:test})"]
+    args: [ 'build', '-t', "gcr.io/$PROJECT_ID/setsisaw-api:test", '.' ]
 images:
   - 'gcr.io/$PROJECT_ID/setsisaw-api'
