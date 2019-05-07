@@ -19,7 +19,7 @@ func NewLocation(c *gin.Context) {
 
 	// TODO: This shouldn't be an editor only function. Anyone should be able to add a location. This is just for testing claims.
 	if !auth.IsEntitled(claims, "EDITOR") {
-		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("User %s is not entitled to add a location.", claims.Username)})
+		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("UserId %s is not entitled to add a location.", claims.Username)})
 		return
 	}
 
@@ -39,7 +39,7 @@ func NewLocation(c *gin.Context) {
 	}
 
 	if !unique {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Location already created"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "LocationId already created"})
 		return
 	}
 
