@@ -2,6 +2,6 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/setsisaw-api:$TAG_NAME', '.' ]
 substitutions:
-  TAG_NAME: test # default value
+  TAG_NAME: echo ${TAG_NAME:-build} # default value
 images:
   - 'gcr.io/$PROJECT_ID/setsisaw-api'
