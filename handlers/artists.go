@@ -19,7 +19,7 @@ func NewArtist(c *gin.Context) {
 
 	// TODO: This shouldn't be an editor only function. Anyone should be able to add an artist. This is just for testing claims.
 	if !auth.IsEntitled(claims, "EDITOR") {
-		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("User %s is not entitled to add an artist.", claims.Username)})
+		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("UserId %s is not entitled to add an artist.", claims.Username)})
 		return
 	}
 
@@ -39,7 +39,7 @@ func NewArtist(c *gin.Context) {
 	}
 
 	if !unique {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Artist already created"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ArtistId already created"})
 		return
 	}
 

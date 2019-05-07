@@ -3,39 +3,41 @@ package types
 import "github.com/dgrijalva/jwt-go"
 
 type User struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Id        string `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 	FirstName string `json:"first_name"`
-	LastName string `json:"last_name"`
-	Id string `json:"id"`
+	LastName  string `json:"last_name"`
 }
 
 type Artist struct {
+	Id   int    `json:"id"`
 	Name string `json:"name"`
-	Id int `json:"id"`
 }
 
 type Set struct {
-	User int `json:"user_id"`
-	Location int `json:"location_id"`
-	Artist int `json:"artist_id"`
-	Id int `json:"id"`
+	Id           int    `json:"id"`
+	UserId       int    `json:"user_id"`
+	ArtistId     int    `json:"artist_id"`
+	ArtistName   string `json:"artist_name"`
+	LocationId   int    `json:"location_id"`
+	LocationName string `json:"location_name"`
 }
 
 type Location struct {
-	Name string `json:"name"`
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
-	City string `json:"city"`
-	State string `json:"state"`
-	Country string `json:"country"`
-	Id int `json:"id"`
+	City        string `json:"city"`
+	State       string `json:"state"`
+	Country     string `json:"country"`
 }
 
 type Claims struct {
 	Username string `json:"username"`
-	Role string `json:"role"`
-	Id string `json:"id"`
+	Role     string `json:"role"`
+	Id       string `json:"id"`
 	jwt.StandardClaims
 }
 
