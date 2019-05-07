@@ -90,12 +90,12 @@ func SignIn(c *gin.Context) {
 
 
 	if authenticated {
-		role, err := getUserRole(userAuth.Username)
+		role, id, err := getUserInfo(userAuth.Username)
 		if err != nil {
 			c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 		}
 
-		token, err := auth.NewToken(userAuth.Username, role)
+		token, err := auth.NewToken(userAuth.Username, role, id)
 		if err != nil {
 			c.JSON(err.StatusCode(), gin.H{"error": err.Description()})
 			return
@@ -125,28 +125,29 @@ func isNewUserUnique(newUser types.User) (bool, error) {
 	return count == 0, nil
 }
 
-func getUserRole(username string) (string, types.Error) {
+func getUserInfo(username string) (string, string, types.Error) {
 	db, err := database.GetConnection()
 	if err != nil {
-		return "", customerrors.New(http.StatusInternalServerError, "could not connect to database")
+		return "", "", customerrors.New(http.StatusInternalServerError, "could not connect to database")
 	}
 	defer db.Close()
 
 	var role string
-	result := db.QueryRow("select role FROM users where username = ?", username)
+	var id string
+	result := db.QueryRow("select role, id FROM users where username = ?", username)
 	if err != nil {
-		return "", customerrors.New(http.StatusInternalServerError, "could not query database")
+		return "", "", customerrors.New(http.StatusInternalServerError, "could not query database")
 	}
 
-	err = result.Scan(&role)
+	err = result.Scan(&role, &id)
 	if err != nil {
 		// If an entry with the username does not exist, send an "Unauthorized"(401) status
 		if err == sql.ErrNoRows {
-			return "", customerrors.New(http.StatusInternalServerError, "could not find user role in database")
+			return "", "", customerrors.New(http.StatusInternalServerError, "could not find user role in database")
 		}
 
-		return "", customerrors.New(http.StatusInternalServerError, "could not query database")
+		return "", "", customerrors.New(http.StatusInternalServerError, "could not query database")
 	}
 
-	return role, nil
+	return role, id, nil
 }

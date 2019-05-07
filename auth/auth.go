@@ -62,13 +62,14 @@ func IsAuthed(username string, password string) (bool, error) {
 	return true, nil
 }
 
-func NewToken(username string, role string) (string, types.Error) {
+func NewToken(username string, role string, id string) (string, types.Error) {
 	var jwtKey = JWT_SIGNING_KEY
 
 	expirationTime := time.Now().Add(TOKEN_VALID_TIME)
 	claims := &types.Claims{
 		Username: username,
 		Role: role,
+		Id: id,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),
