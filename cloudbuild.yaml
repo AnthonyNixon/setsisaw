@@ -2,6 +2,6 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/setsisaw-api:$_SIS_VERSION', '.' ]
 substitutions:
-  _SIS_VERSION: $(echo {$TAG_NAME:-build}) # default value
+  TAG_NAME: test # default value
 images:
   - 'gcr.io/$PROJECT_ID/setsisaw-api'
