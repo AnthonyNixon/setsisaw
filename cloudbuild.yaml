@@ -1,5 +1,5 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/setsisaw-api', '.' ]
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/setsisaw-api:$BRANCH_NAME', '.' ]
 images:
-  - 'gcr.io/$PROJECT_ID/setsisaw-api'
+  - 'gcr.io/$PROJECT_ID/setsisaw-api:$BRANCH_NAME'
