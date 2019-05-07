@@ -39,6 +39,9 @@ func main() {
 	// Locations
 	r.POST("/locations", handlers.NewLocation)
 
+	// Sets
+	r.POST("/sets", handlers.NewSet)
+
 
 	log.Printf("Running SetsISaw API on :%s...", PORT)
 	err := r.Run(fmt.Sprintf(":%s", PORT)) // listen and serve on 0.0.0.0:8080
