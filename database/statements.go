@@ -16,8 +16,8 @@ const GET_SPECIFIC_USER = `select id, username, email, IFNULL(first_name,""), IF
 const GET_ALL_USERS = `select id, username, email, IFNULL(first_name,""), IFNULL(last_name,""), role FROM users;`
 
 // Artists
-const GET_ALL_ARTISTS = "select id, name FROM artists;"
-const GET_SPECIFIC_ARTIST = "select id, name FROM artists where id = ?;"
+const GET_ALL_ARTISTS = "select id, name, default_genre FROM artists;"
+const GET_SPECIFIC_ARTIST = "select id, name, default_genre FROM artists where id = ?;"
 const INSERT_NEW_ARTIST = `insert into artists (name, default_genre) values(?,?);`
 const GET_ARTIST_DEFAULT_GENRE = `select default_genre FROM artists where name = ? or id = ?;`
 
