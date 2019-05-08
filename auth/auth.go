@@ -18,7 +18,8 @@ import (
 )
 
 var JWT_SIGNING_KEY []byte
-const TOKEN_VALID_TIME = 5 * time.Minute
+
+const TOKEN_VALID_TIME = 1 * time.Hour // TODO: Change to 5 minutes for prod
 
 func Initialize() {
 	log.Print("Initializing Authentication")
@@ -68,8 +69,8 @@ func NewToken(username string, role string, id string) (string, types.Error) {
 	expirationTime := time.Now().Add(TOKEN_VALID_TIME)
 	claims := &types.Claims{
 		Username: username,
-		Role: role,
-		Id: id,
+		Role:     role,
+		Id:       id,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),
@@ -104,14 +105,14 @@ func RefreshToken(c *gin.Context) (string, types.Error) {
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return "", customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
+			return "", customerrors.New(http.StatusUnauthorized, "signature invalid, "+err.Error())
 		}
 
 		if !tkn.Valid {
 			return "", customerrors.New(http.StatusUnauthorized, err.Error())
 		}
 
-		return "", customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
+		return "", customerrors.New(http.StatusBadRequest, "Invalid JWT token, "+err.Error())
 
 	}
 
@@ -149,14 +150,14 @@ func GetUserInfo(c *gin.Context) (types.Claims, types.Error) {
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return *claims, customerrors.New(http.StatusUnauthorized, "signature invalid, " + err.Error())
+			return *claims, customerrors.New(http.StatusUnauthorized, "signature invalid, "+err.Error())
 		}
 
 		if !tkn.Valid {
 			return *claims, customerrors.New(http.StatusUnauthorized, err.Error())
 		}
 
-		return *claims, customerrors.New(http.StatusBadRequest, "Invalid JWT token, " + err.Error())
+		return *claims, customerrors.New(http.StatusBadRequest, "Invalid JWT token, "+err.Error())
 
 	}
 
