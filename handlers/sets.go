@@ -72,13 +72,13 @@ func NewSet(c *gin.Context) {
 		return
 	}
 
-	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date, newSet.Metadata.Rating, newSet.Metadata.Genre, newSet.Metadata.Length)
+	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date, newSet.Metadata.Rating, newSet.Metadata.Genre, newSet.Metadata.Length, newSet.Metadata.Notes)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"user_id": newSet.UserId, "artist_id": newSet.ArtistId, "location_id": newSet.LocationId, "date": newSet.Date})
+	c.JSON(http.StatusCreated, newSet)
 }
 
 func GetSetsForCurrentUser(c *gin.Context) {
@@ -149,7 +149,7 @@ func sendSets(query string, c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date, &set.Metadata.Rating, &set.Metadata.Genre, &set.Metadata.Length)
+		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date, &set.Metadata.Rating, &set.Metadata.Genre, &set.Metadata.Length, &set.Metadata.Notes)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

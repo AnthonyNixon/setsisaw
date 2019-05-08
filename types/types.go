@@ -24,6 +24,7 @@ type SetMetadata struct {
 	Rating int    `json:"rating"`
 	Genre  string `json:"genre"`
 	Length int    `json:"length"`
+	Notes  string `json:"notes"`
 }
 
 type Set struct {
