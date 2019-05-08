@@ -72,7 +72,7 @@ func NewSet(c *gin.Context) {
 		return
 	}
 
-	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date, newSet.Metadata.Rating, newSet.Metadata.Genre)
+	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date, newSet.Metadata.Rating, newSet.Metadata.Genre, newSet.Metadata.Length)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -149,7 +149,7 @@ func sendSets(query string, c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date, &set.Metadata.Rating, &set.Metadata.Genre)
+		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date, &set.Metadata.Rating, &set.Metadata.Genre, &set.Metadata.Length)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
