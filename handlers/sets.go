@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/AnthonyNixon/setsisaw/auth"
 	"github.com/AnthonyNixon/setsisaw/database"
-	"github.com/AnthonyNixon/setsisaw/sql"
 	"github.com/AnthonyNixon/setsisaw/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -100,7 +99,7 @@ func GetSetsForCurrentUser(c *gin.Context) {
 		return
 	}
 
-	query := fmt.Sprintf(sql.GET_ALL_SETS_FOR_USER_FORMAT, user_id)
+	query := fmt.Sprintf(database.GET_ALL_SETS_FOR_USER_FORMAT, user_id)
 
 	sendSets(query, c)
 }
@@ -120,7 +119,7 @@ func GetAllSets(c *gin.Context) {
 
 	// If we're here, the user is authorized to get all sets.
 
-	sendSets(sql.GET_ALL_SETS, c)
+	sendSets(database.GET_ALL_SETS, c)
 }
 
 func sendSets(query string, c *gin.Context) {

@@ -26,18 +26,26 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/signup", users.SignUp)
-
 	r.POST("/signin", users.SignIn)
+	r.GET("/refresh", handlers.RefreshToken)
+
 
 	r.GET("/authcheck", handlers.AuthCheck)
 
-	r.GET("/refresh", handlers.RefreshToken)
+	// Users
+	r.GET("/users", handlers.GetAllUsers)
+	r.GET("/user/current", handlers.GetCurrentUser)
+	r.GET("/users/:id", handlers.GetSpecificUser)
 
 	// Artists
 	r.POST("/artists", handlers.NewArtist)
+	r.GET("/artists", handlers.GetAllArtists)
+	r.GET("/artists/:id", handlers.GetArtist)
 
 	// Locations
 	r.POST("/locations", handlers.NewLocation)
+	r.GET("/locations", handlers.GetAllLocations)
+	r.GET("/locations/:id", handlers.GetLocation)
 
 	// Sets
 	r.POST("/sets", handlers.NewSet)
