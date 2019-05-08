@@ -98,7 +98,7 @@ func GetAllArtists(c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&artist.Id, &artist.Name)
+		err := rows.Scan(&artist.Id, &artist.Name, &artist.DefaultGenre)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -142,7 +142,7 @@ func GetArtist(c *gin.Context) {
 
 	var artist types.Artist
 
-	err = result.Scan(&artist.Id, &artist.Name)
+	err = result.Scan(&artist.Id, &artist.Name, &artist.DefaultGenre)
 	if err != nil {
 		// If an entry with the username does not exist, send an "Unauthorized"(401) status
 		if err == sql.ErrNoRows {
