@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/AnthonyNixon/setsisaw/auth"
 	"github.com/AnthonyNixon/setsisaw/database"
@@ -43,7 +44,6 @@ func NewLocation(c *gin.Context) {
 		return
 	}
 
-
 	db, err := database.GetConnection()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -64,6 +64,98 @@ func NewLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"name": newLocation.Name, "description": newLocation.Description})
+}
+
+func GetAllLocations(c *gin.Context) {
+	// Check Auth info
+	claims, customErr := auth.GetUserInfo(c)
+	if customErr != nil {
+		c.JSON(customErr.StatusCode(), gin.H{"error": customErr.Description()})
+		return
+	}
+
+	if !auth.IsEntitled(claims, "USER") {
+		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("User %s is not entitled to get all locations.", claims.Username)})
+		return
+	}
+
+	// If we're here, the user is authorized to get all artists.
+
+	location := types.Location{}
+	locations := make([]types.Location, 0)
+
+	db, err := database.GetConnection()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query(database.GET_ALL_LOCATIONS)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		locations = append(locations, location)
+	}
+	defer rows.Close()
+
+	c.JSON(http.StatusOK, gin.H{"locations": locations, "count": len(locations)})
+
+}
+
+func GetLocation(c *gin.Context) {
+	id := c.Param("id")
+
+	// Check Auth info
+	claims, customErr := auth.GetUserInfo(c)
+	if customErr != nil {
+		c.JSON(customErr.StatusCode(), gin.H{"error": customErr.Description()})
+		return
+	}
+
+	if !auth.IsEntitled(claims, "USER") {
+		c.JSON(http.StatusForbidden, gin.H{"Error": fmt.Sprintf("UserId %s is not entitled to get location info.", claims.Username)})
+		return
+	}
+
+	// if we made it here, we're good to go.
+	db, err := database.GetConnection()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer db.Close()
+
+	result := db.QueryRow(database.GET_SPECIFIC_LOCATION, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed getting location - " + err.Error()})
+		return
+	}
+
+	var location types.Location
+
+	err = result.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country)
+	if err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Location not found"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, location)
+
 }
 
 func isNewLocationUnique(newLocation types.Location) (bool, error) {
