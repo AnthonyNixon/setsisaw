@@ -6,6 +6,7 @@ import (
 	"github.com/AnthonyNixon/setsisaw/database"
 	"github.com/AnthonyNixon/setsisaw/types"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -50,6 +51,14 @@ func NewSet(c *gin.Context) {
 		return
 	}
 
+	// TODO - If set location is not a festival, make sure there's a date.
+
+	if newSet.Metadata.Genre == "" {
+		defaultGenre, _ := getArtistDefaultGenre(newSet)
+		newSet.Metadata.Genre = defaultGenre
+		log.Printf("Default Genre: %s", defaultGenre)
+	}
+
 	db, err := database.GetConnection()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -57,13 +66,13 @@ func NewSet(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("insert into sets (user_id, artist_id, location_id, date) values(?,?,?,?);")
+	stmt, err := db.Prepare(database.INSERT_NEW_SET)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date)
+	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date, newSet.Metadata.Rating, newSet.Metadata.Genre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -140,7 +149,7 @@ func sendSets(query string, c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date)
+		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date, &set.Metadata.Rating, &set.Metadata.Genre)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -166,4 +175,20 @@ func isNewSetUnique(newSet types.Set) (bool, error) {
 	}
 
 	return count == 0, nil
+}
+
+func getArtistDefaultGenre(newSet types.Set) (string, error) {
+	db, err := database.GetConnection()
+	if err != nil {
+		return "", err
+	}
+	defer db.Close()
+
+	var genre string
+	err = db.QueryRow(database.GET_ARTIST_DEFAULT_GENRE, newSet.ArtistName, newSet.ArtistId).Scan(&genre)
+	if err != nil {
+		return "", err
+	}
+
+	return genre, nil
 }

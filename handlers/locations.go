@@ -51,19 +51,19 @@ func NewLocation(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("insert into locations (name, description, city, state, country) values(?,?,?,?,?);")
+	stmt, err := db.Prepare(database.INSERT_NEW_LOCATION)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_, err = stmt.Exec(newLocation.Name, newLocation.Description, newLocation.City, newLocation.State, newLocation.Country)
+	_, err = stmt.Exec(newLocation.Name, newLocation.Description, newLocation.City, newLocation.State, newLocation.Country, newLocation.IsFestival, newLocation.Year)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"name": newLocation.Name, "description": newLocation.Description})
+	c.JSON(http.StatusCreated, newLocation)
 }
 
 func GetAllLocations(c *gin.Context) {
@@ -98,7 +98,7 @@ func GetAllLocations(c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country)
+		err := rows.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country, &location.IsFestival, &location.Year)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -142,7 +142,7 @@ func GetLocation(c *gin.Context) {
 
 	var location types.Location
 
-	err = result.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country)
+	err = result.Scan(&location.Id, &location.Name, &location.Description, &location.City, &location.State, &location.Country, &location.IsFestival, &location.Year)
 	if err != nil {
 		// If an entry with the username does not exist, send an "Unauthorized"(401) status
 		if err == sql.ErrNoRows {
@@ -166,7 +166,7 @@ func isNewLocationUnique(newLocation types.Location) (bool, error) {
 	defer db.Close()
 
 	var count int
-	err = db.QueryRow("select COUNT(*) FROM locations where name = ? and city = ? and state = ? and country = ?", newLocation.Name, newLocation.City, newLocation.State, newLocation.Country).Scan(&count)
+	err = db.QueryRow(database.IS_LOCATION_UNIQUE_QUERY, newLocation.Name, newLocation.City, newLocation.State, newLocation.Country, newLocation.Year).Scan(&count)
 	if err != nil {
 		return false, err
 	}
