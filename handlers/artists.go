@@ -51,13 +51,13 @@ func NewArtist(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("insert into artists (name) values(?);")
+	stmt, err := db.Prepare(database.INSERT_NEW_ARTIST)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_, err = stmt.Exec(newArtist.Name)
+	_, err = stmt.Exec(newArtist.Name, newArtist.DefaultGenre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
