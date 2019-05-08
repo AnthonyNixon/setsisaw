@@ -19,7 +19,7 @@ import (
 
 var JWT_SIGNING_KEY []byte
 
-const TOKEN_VALID_TIME = 1 * time.Hour // TODO: Change to 5 minutes for prod
+const TOKEN_VALID_TIME = 5 * time.Minute // TODO: Change to 5 minutes for prod
 
 func Initialize() {
 	log.Print("Initializing Authentication")
