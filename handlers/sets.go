@@ -57,19 +57,19 @@ func NewSet(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("insert into sets (user_id, artist_id, location_id) values(?,?,?);")
+	stmt, err := db.Prepare("insert into sets (user_id, artist_id, location_id, date) values(?,?,?,?);")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId)
+	_, err = stmt.Exec(newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"user_id": newSet.UserId, "artist_id": newSet.ArtistId, "location_id": newSet.LocationId})
+	c.JSON(http.StatusCreated, gin.H{"user_id": newSet.UserId, "artist_id": newSet.ArtistId, "location_id": newSet.LocationId, "date": newSet.Date})
 }
 
 func GetSetsForCurrentUser(c *gin.Context) {
@@ -140,7 +140,7 @@ func sendSets(query string, c *gin.Context) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName)
+		err := rows.Scan(&set.Id, &set.UserId, &set.ArtistId, &set.ArtistName, &set.LocationId, &set.LocationName, &set.Date)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -160,7 +160,7 @@ func isNewSetUnique(newSet types.Set) (bool, error) {
 	defer db.Close()
 
 	var count int
-	err = db.QueryRow("select COUNT(*) FROM sets where user_id = ? and artist_id = ? and location_id = ?", newSet.UserId, newSet.ArtistId, newSet.LocationId).Scan(&count)
+	err = db.QueryRow(database.IS_SET_UNIQUE_QUERY, newSet.UserId, newSet.ArtistId, newSet.LocationId, newSet.Date).Scan(&count)
 	if err != nil {
 		return false, err
 	}

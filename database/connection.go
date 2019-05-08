@@ -35,12 +35,11 @@ func Initialize() {
 		error = true
 	}
 
-
 	if error {
 		log.Fatal("Missing Database login information. Not Starting.")
 	}
 
-	DSN = DB_USER + ":" + DB_PASS + "@tcp(" + DB_HOST + ":3306)/" + DB_NAME + "?parseTime=true"
+	DSN = DB_USER + ":" + DB_PASS + "@tcp(" + DB_HOST + ":3306)/" + DB_NAME
 
 	connection, err := GetConnection()
 	if err != nil {

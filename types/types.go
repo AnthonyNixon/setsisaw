@@ -1,6 +1,8 @@
 package types
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"github.com/dgrijalva/jwt-go"
+)
 
 type User struct {
 	Id        string `json:"id"`
@@ -24,6 +26,7 @@ type Set struct {
 	ArtistName   string `json:"artist_name"`
 	LocationId   int    `json:"location_id"`
 	LocationName string `json:"location_name"`
+	Date         string `json:"date"`
 }
 
 type Location struct {
