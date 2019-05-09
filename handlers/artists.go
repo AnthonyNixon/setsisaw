@@ -166,7 +166,7 @@ func isNewArtistUnique(newArtist types.Artist) (bool, error) {
 	defer db.Close()
 
 	var count int
-	err = db.QueryRow("select COUNT(*) FROM artists where name = ?", newArtist.Name).Scan(&count)
+	err = db.QueryRow(database.IS_ARTIST_UNIQUE_QUERY, newArtist.Name).Scan(&count)
 	if err != nil {
 		return false, err
 	}

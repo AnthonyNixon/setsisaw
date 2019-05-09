@@ -20,9 +20,11 @@ const GET_ALL_ARTISTS = "select id, name, default_genre FROM artists;"
 const GET_SPECIFIC_ARTIST = "select id, name, default_genre FROM artists where id = ?;"
 const INSERT_NEW_ARTIST = `insert into artists (name, default_genre) values(?,?);`
 const GET_ARTIST_DEFAULT_GENRE = `select default_genre FROM artists where name = ? or id = ?;`
+const IS_ARTIST_UNIQUE_QUERY = `select COUNT(*) FROM artists where name = ?`
 
 // Locations
 const GET_ALL_LOCATIONS = `select id, name, IFNULL(description,""), IFNULL(city,""), IFNULL(state,""), IFNULL(country,""), is_festival, IFNULL(year, 0000) FROM locations;`
 const GET_SPECIFIC_LOCATION = `select id, name, IFNULL(description,""), IFNULL(city,""), IFNULL(state,""), IFNULL(country,""), is_festival, IFNULL(year, 0000) FROM locations WHERE id = ?;`
 const INSERT_NEW_LOCATION = `insert into locations (name, description, city, state, country, is_festival, year) values(?,?,?,?,?,?,?);`
 const IS_LOCATION_UNIQUE_QUERY = `select COUNT(*) FROM locations where name = ? and city = ? and state = ? and country = ? and IF(is_festival = TRUE, year = ?, true );`
+const GET_LOCATION_TYPE = `select is_festival FROM locations where id = ?;`

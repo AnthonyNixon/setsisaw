@@ -51,20 +51,32 @@ func NewSet(c *gin.Context) {
 		return
 	}
 
-	// TODO - If set location is not a festival, make sure there's a date.
-
-	if newSet.Metadata.Genre == "" {
-		defaultGenre, _ := getArtistDefaultGenre(newSet)
-		newSet.Metadata.Genre = defaultGenre
-		log.Printf("Default Genre: %s", defaultGenre)
-	}
-
 	db, err := database.GetConnection()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer db.Close()
+
+	var isFestival bool
+	err = db.QueryRow(database.GET_LOCATION_TYPE, newSet.LocationId).Scan(&isFestival)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get location type: " + err.Error()})
+		return
+	}
+
+	if !isFestival {
+		if newSet.Date == "" || newSet.Date == "0000-00-00" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "non-festival location must have a date"})
+			return
+		}
+	}
+
+	if newSet.Metadata.Genre == "" {
+		defaultGenre, _ := getArtistDefaultGenre(newSet)
+		newSet.Metadata.Genre = defaultGenre
+		log.Printf("Default Genre: %s", defaultGenre)
+	}
 
 	stmt, err := db.Prepare(database.INSERT_NEW_SET)
 	if err != nil {
