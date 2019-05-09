@@ -14,6 +14,8 @@ const INSERT_NEW_SET = `insert into sets (user_id, artist_id, location_id, date,
 // Users
 const GET_SPECIFIC_USER = `select id, username, email, IFNULL(first_name,""), IFNULL(last_name,""), role FROM users where id = ?;`
 const GET_ALL_USERS = `select id, username, email, IFNULL(first_name,""), IFNULL(last_name,""), role FROM users;`
+const IS_USER_UPDATE_UNIQUE = `select COUNT(*) FROM users where id != ? AND (username = ? OR email = ?)`
+const UPDATE_USER = `update users set username = ?, email = ?, first_name = ?, last_name = ?, role = ? WHERE id = ?`
 
 // Artists
 const GET_ALL_ARTISTS = "select id, name, default_genre FROM artists;"

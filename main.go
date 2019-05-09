@@ -29,13 +29,13 @@ func main() {
 	r.POST("/signin", users.SignIn)
 	r.GET("/refresh", handlers.RefreshToken)
 
-
 	r.GET("/authcheck", handlers.AuthCheck)
 
 	// Users
 	r.GET("/users", handlers.GetAllUsers)
 	r.GET("/user/current", handlers.GetCurrentUser)
 	r.GET("/users/:id", handlers.GetSpecificUser)
+	r.PUT("/users", handlers.UpdateUser)
 
 	// Artists
 	r.POST("/artists", handlers.NewArtist)
