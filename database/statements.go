@@ -30,3 +30,5 @@ const GET_SPECIFIC_LOCATION = `select id, name, IFNULL(description,""), IFNULL(c
 const INSERT_NEW_LOCATION = `insert into locations (name, description, city, state, country, is_festival, year) values(?,?,?,?,?,?,?);`
 const IS_LOCATION_UNIQUE_QUERY = `select COUNT(*) FROM locations where name = ? and city = ? and state = ? and country = ? and IF(is_festival = TRUE, year = ?, true );`
 const GET_LOCATION_TYPE = `select is_festival FROM locations where id = ?;`
+const IS_LOCATION_UPDATE_UNIQUE = `select COUNT(*) FROM locations where id != ? AND (name = ? AND city = ? AND state = ? AND country = ? AND year = ?)`
+const UPDATE_LOCATION = `update locations set name = ?, description = ?, city = ?, state = ?, country = ?, is_festival = ?, year = ? WHERE id = ?`

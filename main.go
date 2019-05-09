@@ -46,6 +46,7 @@ func main() {
 	r.POST("/locations", handlers.NewLocation)
 	r.GET("/locations", handlers.GetAllLocations)
 	r.GET("/locations/:id", handlers.GetLocation)
+	r.PUT("/locations/:id", handlers.UpdateLocation)
 
 	// Sets
 	r.POST("/sets", handlers.NewSet)
