@@ -29,13 +29,13 @@ func main() {
 	r.POST("/signin", users.SignIn)
 	r.GET("/refresh", handlers.RefreshToken)
 
-
 	r.GET("/authcheck", handlers.AuthCheck)
 
 	// Users
 	r.GET("/users", handlers.GetAllUsers)
 	r.GET("/user/current", handlers.GetCurrentUser)
 	r.GET("/users/:id", handlers.GetSpecificUser)
+	r.PUT("/users", handlers.UpdateUser)
 
 	// Artists
 	r.POST("/artists", handlers.NewArtist)
@@ -46,6 +46,7 @@ func main() {
 	r.POST("/locations", handlers.NewLocation)
 	r.GET("/locations", handlers.GetAllLocations)
 	r.GET("/locations/:id", handlers.GetLocation)
+	r.PUT("/locations/:id", handlers.UpdateLocation)
 
 	// Sets
 	r.POST("/sets", handlers.NewSet)
