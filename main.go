@@ -6,6 +6,7 @@ import (
 	"github.com/AnthonyNixon/setsisaw/database"
 	"github.com/AnthonyNixon/setsisaw/handlers"
 	"github.com/AnthonyNixon/setsisaw/users"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -24,6 +25,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	r.Use(cors.Default())
 
 	r.POST("/signup", users.SignUp)
 	r.POST("/signin", users.SignIn)
@@ -54,6 +56,7 @@ func main() {
 	r.GET("/sets/all", handlers.GetAllSets)
 
 	log.Printf("Running SetsISaw API on :%s...", PORT)
+
 	err := r.Run(fmt.Sprintf(":%s", PORT)) // listen and serve on 0.0.0.0:8080
 	if err != nil {
 		log.Fatal(err.Error())
