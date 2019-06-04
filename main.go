@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
+	"time"
 )
 
 var PORT = ""
@@ -25,7 +26,13 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"POST", "GET", "PUT", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	r.POST("/signup", users.SignUp)
 	r.POST("/signin", users.SignIn)
